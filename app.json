@@ -12,6 +12,18 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins":[
+      [
+        "expo-media-library",
+        {
+          "photosPermission":
+          "Allow TailorApp to access your photos",
+          "savePhotosPermission":
+          "Allow TailorApp to save photos to your library",
+          "isAccessMediaLocationEnabled": "true"
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true
     },
