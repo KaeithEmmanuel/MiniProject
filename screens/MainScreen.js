@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
+// MainScreen.js
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
@@ -12,13 +14,40 @@ const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
 function MainScreen({ navigation }) {
+  const [profileImage, setProfileImage] = useState(null);
+
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().profileImage) {
+          setProfileImage(docSnap.data().profileImage);
+        }
+      }
+    };
+    fetchProfileImage();
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to Body Measurement App</Text>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Camera")}> 
-        <Text style={styles.buttonText}>Take Photo</Text>
+      <TouchableOpacity onPress={() => navigation.openDrawer()}>
+        <Icon name="menu" size={30} color="#333" />
       </TouchableOpacity>
-      <Text style={styles.description}>Click a picture for body measurements.</Text>
+      <Animated.View entering={FadeInDown.duration(1000)}>
+        <Text style={styles.title}>Welcome to Body Measurement App</Text>
+      </Animated.View>
+      {profileImage ? (
+        <Image source={{ uri: profileImage }} style={styles.profileImage} />
+      ) : (
+        <Text>No profile image available</Text>
+      )}
+      <Animated.View entering={FadeInDown.duration(1200).delay(200)}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Camera")}>
+          <Text style={styles.buttonText}>Take Photo</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 }
@@ -44,19 +73,12 @@ function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Image source={require("../assets/logo.png")} style={styles.profileImage} />
-      <Text style={styles.profileText}>Name: {userData.name}</Text>
-      <Text style={styles.profileText}>Height: {userData.height} cm</Text>
-      <Text style={styles.profileText}>Weight: {userData.weight} kg</Text>
-    </View>
-  );
-}
-
-function AboutScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>About Us</Text>
-      <Text>We provide accurate body measurement analysis using computer vision technology.</Text>
+      <Animated.View entering={FadeInDown.duration(1000)}>
+        {userData.profileImage && <Image source={{ uri: userData.profileImage }} style={styles.profileImage} />}
+        <Text style={styles.profileText}>Name: {userData.username}</Text>
+        <Text style={styles.profileText}>Height: {userData.height} cm</Text>
+        <Text style={styles.profileText}>Weight: {userData.weight} kg</Text>
+      </Animated.View>
     </View>
   );
 }
@@ -91,12 +113,13 @@ function BottomTabs() {
 
 export default function MainPage() {
   return (
-    <Drawer.Navigator>
-      <Drawer.Screen name="Home" component={BottomTabs} />
-      <Drawer.Screen name="Profile" component={ProfileScreen} />
-      <Drawer.Screen name="About Us" component={AboutScreen} />
-      <Drawer.Screen name="Logout" component={Logout} />
-    </Drawer.Navigator>
+    <NavigationContainer>
+      <Drawer.Navigator screenOptions={{ drawerType: 'slide', headerShown: false }}>
+        <Drawer.Screen name="Home" component={BottomTabs} options={{ drawerIcon: () => <Icon name="home-outline" size={24} /> }} />
+        <Drawer.Screen name="Profile" component={ProfileScreen} options={{ drawerIcon: () => <Icon name="person-outline" size={24} /> }} />
+        <Drawer.Screen name="Logout" component={Logout} options={{ drawerIcon: () => <Icon name="log-out-outline" size={24} /> }} />
+      </Drawer.Navigator>
+    </NavigationContainer>
   );
 }
 
@@ -105,7 +128,6 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: "bold", color: "#333", marginBottom: 30 },
   button: { backgroundColor: "#007bff", padding: 15, borderRadius: 30, width: 200, alignItems: "center" },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  description: { marginTop: 20, fontSize: 14, color: "#555" },
   profileImage: { width: 150, height: 150, borderRadius: 75, marginBottom: 20 },
   profileText: { fontSize: 18, color: "#333", marginBottom: 10 },
 });

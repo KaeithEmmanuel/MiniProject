@@ -4,9 +4,8 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { auth } from "../firebaseconfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
-// Responsive width calculation
 const screenWidth = Dimensions.get("window").width;
-const inputWidth = screenWidth > 600 ? 400 : screenWidth * 0.85; // Adjusting to 85% for smaller screens
+const inputWidth = screenWidth > 600 ? 400 : screenWidth * 0.85;
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -18,8 +17,7 @@ export default function LoginScreen({ navigation }) {
       return;
     }
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      alert("Login successful!");
+      await signInWithEmailAndPassword(auth, email, password);
       navigation.navigate("Main");
     } catch (error) {
       alert(error.message);
@@ -31,7 +29,6 @@ export default function LoginScreen({ navigation }) {
       <Animated.View entering={FadeInDown.duration(1000)}>
         <Text style={styles.title}>Login</Text>
       </Animated.View>
-      
       <Animated.View entering={FadeInDown.duration(1200).delay(200)}>
         <Text style={styles.label}>Email:</Text>
         <TextInput
@@ -40,7 +37,6 @@ export default function LoginScreen({ navigation }) {
           keyboardType="email-address"
         />
       </Animated.View>
-
       <Animated.View entering={FadeInDown.duration(1400).delay(400)}>
         <Text style={styles.label}>Password:</Text>
         <TextInput
@@ -49,7 +45,6 @@ export default function LoginScreen({ navigation }) {
           onChangeText={setPassword}
         />
       </Animated.View>
-
       <Animated.View entering={FadeInDown.duration(1600).delay(600)}>
         <TouchableOpacity style={[styles.button, { width: inputWidth }]} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
