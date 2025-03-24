@@ -12,29 +12,39 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "plugins":[
+    "plugins": [
       [
         "expo-media-library",
         {
-          "photosPermission":
-          "Allow TailorApp to access your photos",
-          "savePhotosPermission":
-          "Allow TailorApp to save photos to your library",
+          "photosPermission": "Allow TailorApp to access your photos",
+          "savePhotosPermission": "Allow TailorApp to save photos to your library",
           "isAccessMediaLocationEnabled": "true"
         }
       ]
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "expo": {
+        "permissions": {
+          "camera": "Allow access to camera",
+          "mediaLibrary": "Allow access to photo library"
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "permissions": ["camera"]
     }
   }
 }

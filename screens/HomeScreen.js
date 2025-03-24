@@ -1,23 +1,44 @@
 import React from "react";
-import { View, Text, Image, Button, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { auth } from "../firebaseconfig";
 
 export default function HomeScreen({ navigation }) {
+  const navigateTo = (screen) => {
+    navigation.navigate(screen);
+  };
+
   return (
     <View style={styles.container}>
-      <Image source={require("../assets/logo.png")} style={styles.logo} />
-      <Text style={styles.title}>Welcome to Body Measurement App</Text>
-      <Button title="Login" style={styles.button} onPress={() => navigation.navigate("Login")} />
-      <Button title="Signup" style={styles.button}   onPress={() => navigation.navigate("Signup")} />
-      <Button title="Open Camera" style={styles.button} onPress={() => navigation.navigate("Camera")} />
+      <Animated.View entering={FadeInDown.duration(1000)}>
+        <Image source={require("../assets/logo.png")} style={styles.logo} />
+        <Text style={styles.title}>Welcome to Body Measurement App</Text>
+      </Animated.View>
+      
+      <Animated.View entering={FadeInDown.duration(1200).delay(200)}>
+        <TouchableOpacity style={[styles.button, styles.loginButton]} onPress={() => navigateTo("Login")}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.duration(1400).delay(400)}>
+        <TouchableOpacity style={[styles.button, styles.signupButton]} onPress={() => navigateTo("Signup")}>
+          <Text style={styles.buttonText}>Signup</Text>
+        </TouchableOpacity>
+      </Animated.View>
+
+      
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
-  logo: { width: 150, height: 150, marginBottom: 20 },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 20 },
-  button: { margin: 10 , width: 200, height: 50 , backgroundColor: "blue" ,flex: 1, justifyContent: "center", spacing:
-  10 ,alignItems: "center" }, 
+  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f9f9f9" },
+  logo: { width: 150, height: 150, marginBottom: 20, borderRadius: 75 ,alignItems: "center",marginLeft:100},
+  title: { fontSize: 24, fontWeight: "bold", color: "#333", marginBottom: 40 },
+  button: { width: 200, padding: 15, borderRadius: 30, marginBottom: 20, alignItems: "center" },
+  loginButton: { backgroundColor: "#007bff" },
+  signupButton: { backgroundColor: "#28a745" },
+  cameraButton: { backgroundColor: "#ffc107" },
+  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
 });
