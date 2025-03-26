@@ -1,10 +1,9 @@
 // MainScreen.js
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert ,Image} from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { auth, db } from "../firebaseconfig";
 import { signOut } from "firebase/auth";
@@ -14,35 +13,14 @@ const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
 function MainScreen({ navigation }) {
-  const [profileImage, setProfileImage] = useState(null);
-
-  useEffect(() => {
-    const fetchProfileImage = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists() && docSnap.data().profileImage) {
-          setProfileImage(docSnap.data().profileImage);
-        }
-      }
-    };
-    fetchProfileImage();
-  }, []);
-
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.openDrawer()}>
+      <TouchableOpacity onPress={() => navigation.openDrawer()} style={styles.menuButton}>
         <Icon name="menu" size={30} color="#333" />
       </TouchableOpacity>
       <Animated.View entering={FadeInDown.duration(1000)}>
         <Text style={styles.title}>Welcome to Body Measurement App</Text>
       </Animated.View>
-      {profileImage ? (
-        <Image source={{ uri: profileImage }} style={styles.profileImage} />
-      ) : (
-        <Text>No profile image available</Text>
-      )}
       <Animated.View entering={FadeInDown.duration(1200).delay(200)}>
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Camera")}>
           <Text style={styles.buttonText}>Take Photo</Text>
@@ -74,7 +52,7 @@ function ProfileScreen() {
   return (
     <View style={styles.container}>
       <Animated.View entering={FadeInDown.duration(1000)}>
-        {userData.profileImage && <Image source={{ uri: userData.profileImage }} style={styles.profileImage} />}
+        <Image source={require("../assets/profile.png")} style={styles.profileImage} />
         <Text style={styles.profileText}>Name: {userData.username}</Text>
         <Text style={styles.profileText}>Height: {userData.height} cm</Text>
         <Text style={styles.profileText}>Weight: {userData.weight} kg</Text>
@@ -88,7 +66,7 @@ function Logout({ navigation }) {
     try {
       await signOut(auth);
       Alert.alert("Logout Successful!");
-      navigation.navigate("Home");
+      navigation.navigate("Login");
     } catch (error) {
       Alert.alert(error.message);
     }
@@ -113,13 +91,11 @@ function BottomTabs() {
 
 export default function MainPage() {
   return (
-    <NavigationContainer>
-      <Drawer.Navigator screenOptions={{ drawerType: 'slide', headerShown: false }}>
-        <Drawer.Screen name="Home" component={BottomTabs} options={{ drawerIcon: () => <Icon name="home-outline" size={24} /> }} />
-        <Drawer.Screen name="Profile" component={ProfileScreen} options={{ drawerIcon: () => <Icon name="person-outline" size={24} /> }} />
-        <Drawer.Screen name="Logout" component={Logout} options={{ drawerIcon: () => <Icon name="log-out-outline" size={24} /> }} />
-      </Drawer.Navigator>
-    </NavigationContainer>
+    <Drawer.Navigator screenOptions={{ drawerType: 'slide', headerShown: false }}>
+      <Drawer.Screen name="Home" component={BottomTabs} options={{ drawerIcon: () => <Icon name="home-outline" size={24} /> }} />
+      <Drawer.Screen name="Profile" component={ProfileScreen} options={{ drawerIcon: () => <Icon name="person-outline" size={24} /> }} />
+      <Drawer.Screen name="Logout" component={Logout} options={{ drawerIcon: () => <Icon name="log-out-outline" size={24} /> }} />
+    </Drawer.Navigator>
   );
 }
 
@@ -128,6 +104,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: "bold", color: "#333", marginBottom: 30 },
   button: { backgroundColor: "#007bff", padding: 15, borderRadius: 30, width: 200, alignItems: "center" },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  profileImage: { width: 150, height: 150, borderRadius: 75, marginBottom: 20 },
   profileText: { fontSize: 18, color: "#333", marginBottom: 10 },
+  menuButton: { position: 'absolute', top: 50, left: 20 },
+  profileImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 20 },
 });
