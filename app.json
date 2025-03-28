@@ -29,6 +29,9 @@
           "camera": "Allow access to camera",
           "mediaLibrary": "Allow access to photo library"
         }
+      },
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs camera access to take photos"
       }
     },
     "android": {
