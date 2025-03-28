@@ -1,111 +1,139 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Button, Image, StyleSheet } from 'react-native';
-import { Camera } from 'expo-camera';
-import { ref, uploadBytes, uploadString } from 'firebase/storage';
-import { auth, storage } from '../firebaseconfig';
+import React, { useRef, useState } from "react";
+import { Button, Pressable, StyleSheet, Text, View } from "react-native";
+import { CameraMode, CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import { Image } from "expo-image";
+import { AntDesign, Feather, FontAwesome6 } from "@expo/vector-icons";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { addDoc, collection } from "firebase/firestore";
+import { db, storage } from "../firebaseconfig"; // Ensure correct import of firebaseconfig
 
-const CameraScreen = () => {
-  const [hasPermission, setHasPermission] = useState(null);
-  const camRef = useRef(null);
-  const [capturedImage, setCapturedImage] = useState(null);
-  const [cameraType, setCameraType] = useState(Camera.Constants.Type.back);
+export default function CameraScreen() {
+  const [permission, requestPermission] = useCameraPermissions();
+  const refCamera = useRef(null);
+  const [uri, setUri] = useState(null);
+  const [mode, setMode] = useState("picture");
+  const [facing, setFacing] = useState("back");
+  const [recording, setRecording] = useState(false);
 
-  // Request Camera Permissions
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
+  if (!permission) return <Text>Loading permissions...</Text>;
 
-  // Capture Image
-  const handleCapture = async () => {
-    if (camRef.current) {
-      try {
-        const photo = await camRef.current.takePictureAsync();
-        console.log(photo);
-        setCapturedImage(photo.uri);
-
-        const response = await fetch(photo.uri);
-        const blob = await response.blob();
-        console.log("Blob:", blob);
-
-        const storageRef = ref(storage, `${auth.currentUser.uid}.jpg`);
-        await uploadBytes(storageRef, blob);
-        console.log("Image uploaded successfully");
-      } catch (error) {
-        console.error("Error capturing/uploading image:", error);
-      }
-    }
-  };
-
-
-  // Flip camera type
-  const flipCamera = () => {
-    setCameraType(
-      cameraType === Camera.Constants.Type.back
-        ? Camera.Constants.Type.front
-        : Camera.Constants.Type.back
-    );
-  };
-
-  // Handle permission states
-  if (hasPermission === null) {
-    return <View style={styles.container}><Text>Requesting permission...</Text></View>;
-  }
-  if (hasPermission === false) {
+  if (!permission.granted) {
     return (
       <View style={styles.container}>
-        <Text>No access to camera</Text>
-        <Button title="Request Permission" onPress={() => Camera.requestCameraPermissionsAsync()} />
+        <Text style={{ textAlign: "center" }}>We need your permission to use the camera</Text>
+        <Button onPress={requestPermission} title="Grant Permission" />
       </View>
     );
   }
 
-  return (
-    <View style={styles.container}>
-      <Camera 
-        ref={camRef} 
-        style={styles.camera} 
-        type={cameraType}
-      >
-        <View style={styles.buttonContainer}>
-          <Button title="Capture" onPress={handleCapture} />
-          <Button title="Flip" onPress={flipCamera} />
-        </View>
-      </Camera>
-      
-      {capturedImage && (
-        <Image source={{ uri: capturedImage }} style={styles.preview} />
-      )}
+  const takePicture = async () => {
+    try {
+      const photo = await refCamera.current?.takePictureAsync();
+      if (photo?.uri) {
+        setUri(photo.uri);
+        await uploadImageToFirebase(photo.uri);
+      } else {
+        console.error("Failed to capture image. Photo URI is null.");
+      }
+    } catch (error) {
+      console.error("Error taking picture:", error);
+    }
+  };
+
+  const uploadImageToFirebase = async (uri) => {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const imageRef = ref(storage, `images/${Date.now()}.jpg`);
+      await uploadBytes(imageRef, blob);
+      const downloadURL = await getDownloadURL(imageRef);
+
+      await addDoc(collection(db, "photos"), {
+        imageUrl: downloadURL,
+        createdAt: new Date(),
+      });
+      console.log("Image uploaded successfully:", downloadURL);
+  };
+
+  const toggleMode = () => setMode((prev) => (prev === "picture" ? "video" : "picture"));
+  const toggleFacing = () => setFacing((prev) => (prev === "back" ? "front" : "back"));
+
+  const renderPicture = () => (
+    <View>
+      <Image source={{ uri }} contentFit="contain" style={{ width: 300, aspectRatio: 1 }} />
+      <Button onPress={() => setUri(null)} title="Take Another Picture" />
     </View>
   );
-};
+
+  const renderCamera = () => (
+    <CameraView
+      style={styles.camera}
+      ref={refCamera}
+      mode={mode}
+      facing={facing}
+      mute={false}
+      responsiveOrientationWhenOrientationLocked
+    >
+      <View style={styles.shutterContainer}>
+        <Pressable onPress={toggleMode}>
+          {mode === "picture" ? (
+            <AntDesign name="picture" size={32} color="white" />
+          ) : (
+            <Feather name="video" size={32} color="white" />
+          )}
+        </Pressable>
+
+        <Pressable onPress={takePicture}>
+          {({ pressed }) => (
+            <View style={[styles.shutterBtn, { opacity: pressed ? 0.5 : 1 }]}> 
+              <View style={[styles.shutterBtnInner, { backgroundColor: "white" }]} />
+            </View>
+          )}
+        </Pressable>
+
+        <Pressable onPress={toggleFacing}>
+          <FontAwesome6 name="rotate-left" size={32} color="white" />
+        </Pressable>
+      </View>
+    </CameraView>
+  );
+
+  return <View style={styles.container}>{uri ? renderPicture() : renderCamera()}</View>;
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   camera: {
-    width: '90%',
-    aspectRatio: 3/4,
-    marginBottom: 20,
-  },
-  buttonContainer: {
     flex: 1,
-    backgroundColor: 'transparent',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'flex-end',
-    marginBottom: 20,
+    width: "100%",
   },
-  preview: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
+  shutterContainer: {
+    position: "absolute",
+    bottom: 44,
+    left: 0,
+    width: "100%",
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 30,
+  },
+  shutterBtn: {
+    backgroundColor: "transparent",
+    borderWidth: 5,
+    borderColor: "white",
+    width: 85,
+    height: 85,
+    borderRadius: 45,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  shutterBtnInner: {
+    width: 70,
+    height: 70,
+    borderRadius: 50,
   },
 });
-
-export default CameraScreen;

@@ -20,6 +20,14 @@
           "savePhotosPermission": "Allow TailorApp to save photos to your library",
           "isAccessMediaLocationEnabled": "true"
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow TailorApp to access your camera",
+          "microphonePermission": "Allow TailorApp to access your microphone",
+          "recordAudioAndroid": true
+        }
       ]
     ],
     "ios": {

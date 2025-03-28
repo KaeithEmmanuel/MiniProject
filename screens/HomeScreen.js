@@ -1,6 +1,8 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+
+const { width } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }) {
   const navigateTo = (screen) => navigation.navigate(screen);
@@ -9,7 +11,7 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       <Animated.View entering={FadeInDown.duration(1000)}>
         <Image source={require("../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.title}>Body Measrment Application</Text>
+        <Text style={styles.title}>Body Measurement Application</Text>
       </Animated.View>
       <Animated.View entering={FadeInDown.duration(1200).delay(200)}>
         <TouchableOpacity style={[styles.button, styles.loginButton]} onPress={() => navigateTo("Login")}>
@@ -27,10 +29,9 @@ export default function HomeScreen({ navigation }) {
 
 
 const styles = StyleSheet.create({
-  //add bg image to entire screen with opacity
   container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f9f9f9" },
-  logo: { width: 150, height: 150,marginLeft:125, borderRadius: 75 },
-  title: { fontSize: 24, fontWeight: "bold", color: "#333", marginBottom: 20 },
+  logo: { width: 150, height: 150, borderRadius: 75, marginBottom: 20 , margin:'auto'},
+  title: { fontSize: 24, fontWeight: "bold", color: "#333", marginBottom: 20, textAlign: 'center' },
   button: { width: 200, padding: 15, borderRadius: 30, marginBottom: 20, alignItems: "center" },
   loginButton: { backgroundColor: "#007bff" },
   signupButton: { backgroundColor: "#28a745" },
