@@ -52,6 +52,7 @@ export default function CameraScreen() {
         createdAt: new Date(),
       });
       console.log("Image uploaded successfully:", downloadURL);
+    
   };
 
   const toggleMode = () => setMode((prev) => (prev === "picture" ? "video" : "picture"));
