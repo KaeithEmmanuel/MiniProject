@@ -28,6 +28,13 @@
           "microphonePermission": "Allow TailorApp to access your microphone",
           "recordAudioAndroid": true
         }
+      ],
+      [
+      "expo-video",
+        {
+          "supportsBackgroundPlayback": true,
+          "supportsPictureInPicture": true
+        }
       ]
     ],
     "ios": {
@@ -35,7 +42,8 @@
       "expo": {
         "permissions": {
           "camera": "Allow access to camera",
-          "mediaLibrary": "Allow access to photo library"
+          "mediaLibrary": "Allow access to photo library",
+          "microphone": "Allow access to microphone"
         }
       },
       "infoPlist": {
@@ -50,12 +58,15 @@
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO"
       ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "permissions": ["camera"]
+      "permissions": [
+        "camera"
+      ]
     }
   }
 }
