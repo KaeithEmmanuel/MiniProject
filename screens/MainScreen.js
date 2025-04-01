@@ -9,6 +9,8 @@ import { auth, db } from "../firebaseconfig";
 import { signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 
+import CameraScreen from "./CameraScreen";
+
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -96,6 +98,9 @@ export default function MainPage() {
   return (
     <Drawer.Navigator screenOptions={{ drawerType: 'slide', headerShown: false }}>
       <Drawer.Screen name="Home" component={BottomTabs} options={{ drawerIcon: () => <Icon name="home-outline" size={24} /> }} />
+      <Drawer.Screen name="Camera" component={CameraScreen} options={{ drawerIcon: () => <Icon name="camera-outline" size={24} /> }} />
+      <Drawer.Screen name="Profile" component={ProfileScreen} options={{ drawerIcon: () => <Icon name="person-outline" size={24} /> }} />
+      <Drawer.Screen name="Logout" component={Logout} options={{ drawerIcon: () => <Icon name="log-out-outline" size={24} /> }} />
     </Drawer.Navigator>
   );
 }

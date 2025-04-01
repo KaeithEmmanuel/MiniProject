@@ -30,7 +30,7 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f9f9f9" },
-  logo: { width: 150, height: 150, borderRadius: 75, marginBottom: 20 , margin:'auto'},
+  logo: { width: 200, height: 150, borderRadius:30, marginBottom: 20 , margin:'auto'},
   title: { fontSize: 24, fontWeight: "bold", color: "#333", marginBottom: 20, textAlign: 'center' },
   button: { width: 200, padding: 15, borderRadius: 30, marginBottom: 20, alignItems: "center" },
   loginButton: { backgroundColor: "#007bff" },

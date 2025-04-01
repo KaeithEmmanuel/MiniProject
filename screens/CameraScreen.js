@@ -1,27 +1,38 @@
 import React, { useRef, useState } from "react";
-import { Button, Pressable, StyleSheet, Text, View } from "react-native";
+import { Button, Pressable, StyleSheet, Text, View, Alert } from "react-native";
 import { CameraMode, CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
 import { Image } from "expo-image";
 import { AntDesign, Feather, FontAwesome6 } from "@expo/vector-icons";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { addDoc, collection } from "firebase/firestore";
-import { db, storage } from "../firebaseconfig"; // Ensure correct import of firebaseconfig
+import { db, storage } from "../firebaseconfig";
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
+  const [galleryPermission, requestGalleryPermission] = ImagePicker.useMediaLibraryPermissions();
   const refCamera = useRef(null);
   const [uri, setUri] = useState(null);
   const [mode, setMode] = useState("picture");
   const [facing, setFacing] = useState("back");
-  const [recording, setRecording] = useState(false);
 
-  if (!permission) return <Text>Loading permissions...</Text>;
+  if (!permission || !galleryPermission) return <Text>Loading permissions...</Text>;
 
   if (!permission.granted) {
     return (
       <View style={styles.container}>
-        <Text style={{ textAlign: "center" }}>We need your permission to use the camera</Text>
+        <Text>We need your permission to use the camera</Text>
         <Button onPress={requestPermission} title="Grant Permission" />
+      </View>
+    );
+  }
+
+  if (!galleryPermission.granted) {
+    return (
+      <View style={styles.container}>
+        <Text>We need your permission to access the gallery</Text>
+        <Button onPress={requestGalleryPermission} title="Grant Permission" />
       </View>
     );
   }
@@ -31,28 +42,41 @@ export default function CameraScreen() {
       const photo = await refCamera.current?.takePictureAsync();
       if (photo?.uri) {
         setUri(photo.uri);
+        await MediaLibrary.saveToLibraryAsync(photo.uri);
+        Alert.alert("Image Saved to Gallery");
         await uploadImageToFirebase(photo.uri);
-      } else {
-        console.error("Failed to capture image. Photo URI is null.");
       }
     } catch (error) {
       console.error("Error taking picture:", error);
     }
   };
 
-  const uploadImageToFirebase = async (uri) => {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      const imageRef = ref(storage, `images/${Date.now()}.jpg`);
-      await uploadBytes(imageRef, blob);
-      const downloadURL = await getDownloadURL(imageRef);
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
-      await addDoc(collection(db, "photos"), {
-        imageUrl: downloadURL,
-        createdAt: new Date(),
-      });
-      console.log("Image uploaded successfully:", downloadURL);
-    
+    if (!result.canceled) {
+      setUri(result.assets[0].uri);
+      await uploadImageToFirebase(result.assets[0].uri);
+    }
+  };
+
+  const uploadImageToFirebase = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const imageRef = ref(storage, `images/${Date.now()}.jpg`);
+    await uploadBytes(imageRef, blob);
+    const downloadURL = await getDownloadURL(imageRef);
+
+    await addDoc(collection(db, "photos"), {
+      imageUrl: downloadURL,
+      createdAt: new Date(),
+    });
+    console.log("Image uploaded successfully:", downloadURL);
   };
 
   const toggleMode = () => setMode((prev) => (prev === "picture" ? "video" : "picture"));
@@ -94,6 +118,8 @@ export default function CameraScreen() {
         <Pressable onPress={toggleFacing}>
           <FontAwesome6 name="rotate-left" size={32} color="white" />
         </Pressable>
+
+        <Button onPress={pickImage} title="Pick from Gallery" />
       </View>
     </CameraView>
   );
