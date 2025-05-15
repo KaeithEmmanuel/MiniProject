@@ -1,4 +1,3 @@
-// MainScreen.js
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -51,18 +50,18 @@ export default function SignupScreen({ navigation }) {
             <Text style={styles.title}>Sign Up</Text>
           </Animated.View>
           {[{ label: "Username", value: username, setValue: setUsername },
-            { label: "Age", value: age, setValue: setAge },
-            { label: "Height (cm)", value: height, setValue: setHeight },
-            { label: "Weight (kg)", value: weight, setValue: setWeight },
-            { label: "Email", value: email, setValue: setEmail },
-            { label: "Password", value: password, setValue: setPassword, secure: true },
+          { label: "Age", value: age, setValue: setAge },
+          { label: "Height (cm)", value: height, setValue: setHeight },
+          { label: "Weight (kg)", value: weight, setValue: setWeight },
+          { label: "Email", value: email, setValue: setEmail },
+          { label: "Password", value: password, setValue: setPassword, secure: true },
           ].map((field, index) => (
             <Animated.View key={index} entering={FadeInDown.duration(1200 + index * 200)}>
               <Text style={styles.label}>{field.label}:</Text>
-              <TextInput 
-                style={[styles.input, { width: inputWidth }]} 
-                onChangeText={field.setValue} 
-                secureTextEntry={field.secure || false} 
+              <TextInput
+                style={[styles.input, { width: inputWidth }]}
+                onChangeText={field.setValue}
+                secureTextEntry={field.secure || false}
                 value={field.value}
               />
             </Animated.View>

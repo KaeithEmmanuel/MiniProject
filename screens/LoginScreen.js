@@ -18,7 +18,7 @@ export default function LoginScreen({ navigation }) {
     }
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigation.navigate("Main");
+      navigation.navigate("MainScreen");
     } catch (error) {
       alert(error.message);
     }
